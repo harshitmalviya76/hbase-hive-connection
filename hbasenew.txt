@@ -1,0 +1,87 @@
+Add jar file in order to do hive and hbase connection
+
+add jar hive-hbase-handler-3.1.3.jar
+-------------------------------------------------------------------------
+Create a table in hive and mapping with HBase table 
+
+create external table if not exists hive_sales_order_data
+(
+key int,
+ordernumber int,
+quantityordered int,
+priceeach float,
+orderlinenumber int,
+sales float,
+status string,
+qtr_id int,
+month_id int,
+year_id int,
+productline string,
+msrp int,
+productcode string,
+phone string,
+city string,
+state string,
+postalcode int,
+country string,
+territory string,
+contactlastname string,
+contactfirstname string,
+dealsize string
+)
+row format delimited
+fields terminated by ','
+STORED BY 'org.apache.hadoop.hive.hbase.HBaseStorageHandler'
+WITH SERDEPROPERTIES
+("hbase.columns.mapping"=":key, ordernumber:ordernumber, quantityordered:quantityordered, priceeach:priceeach, 
+orderlinenumber:orderlinenumber, sales:sales, status:status, qtr_id:qtr_id, month_id:month_id, year_id:year_id, 
+productline:productline, msrp:msrp, productcode:productcode, phone:phone, city:city, state:state, postalcode:postalcode, 
+country:country, territory:territory, contactlastname:contactlastname, contactfirstname:contactfirstname, dealsize:dealsize")
+TBLPROPERTIES("hbase.table.name"="hbase_sales_order_data");
+
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+create temp_hive_sales_order_data table
+
+create external table if not exists temp_hive_sales_order_data
+(
+key int,
+ordernumber int,
+quantityordered int,
+priceeach float,
+orderlinenumber int,
+sales float,
+status string,
+qtr_id int,
+month_id int,
+year_id int,
+productline string,
+msrp int,
+productcode string,
+phone string,
+city string,
+state string,
+postalcode int,
+country string,
+territory string,
+contactlastname string,
+contactfirstname string,
+dealsize string
+)
+row format delimited
+fields terminated by ',';
+
+------------------------------------------------------------------------
+Load the sales data into the temp_hive_sales_order_data table
+
+load data inpath '/learningMaterial/sales_order_data.csv' into table temp_hive_sales_order_data;
+------------------------------------------------------------------------
+Insert the data from stage table to main hive table
+insert into table hive_sales_order_data select * from temp_hive_sales_order_data;
+
+-------------------------------------------------------------------------
+Check Whether Successfully data is inserted or not
+
+SELECT * FROM hive_sales_order_data;
+-------------------------------------------------------------------------
+Check in HBase table
+scan 'hbase_sales_order_data';
